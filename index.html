@@ -93,8 +93,8 @@
 
     .tiers-box,
     .warning-box,
-    .base-box,
-    .summary-box {
+    .summary-box,
+    .base-box {
       margin-top: 28px;
       background: #f9fafb;
       border: 1px solid #e5e7eb;
@@ -109,16 +109,15 @@
     }
 
     .tiers-box h2,
-    .base-box h2,
-    .summary-box h2 {
+    .summary-box h2,
+    .base-box h2 {
       margin-top: 0;
       margin-bottom: 15px;
       font-size: 20px;
     }
 
     .tiers-grid,
-    .summary-grid,
-    .base-grid {
+    .summary-grid {
       display: grid;
       gap: 16px;
     }
@@ -131,13 +130,8 @@
       grid-template-columns: repeat(4, 1fr);
     }
 
-    .base-grid {
-      grid-template-columns: 1fr 1fr;
-    }
-
     .tier-card,
-    .summary-card,
-    .base-card {
+    .summary-card {
       background: #fff;
       border: 1px solid #e5e7eb;
       border-radius: 12px;
@@ -145,28 +139,18 @@
     }
 
     .tier-card h3,
-    .summary-card h3,
-    .base-card h3 {
+    .summary-card h3 {
       margin-top: 0;
       margin-bottom: 10px;
       font-size: 17px;
     }
 
     .tier-card p,
-    .base-card ul,
     .summary-card p {
       margin: 0;
       font-size: 14px;
       line-height: 1.5;
       color: #374151;
-    }
-
-    .base-card ul {
-      padding-left: 18px;
-    }
-
-    .base-card li {
-      margin-bottom: 8px;
     }
 
     .summary-label {
@@ -185,6 +169,18 @@
     .summary-total .summary-value {
       color: #0f766e;
       font-size: 22px;
+    }
+
+    .base-box ul {
+      margin: 0;
+      padding-left: 20px;
+      color: #374151;
+    }
+
+    .base-box li {
+      margin-bottom: 10px;
+      line-height: 1.5;
+      font-size: 14px;
     }
 
     .result {
@@ -274,8 +270,7 @@
     @media (max-width: 900px) {
       .grid,
       .grid-3,
-      .tiers-grid,
-      .base-grid {
+      .tiers-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -309,31 +304,28 @@
       рубрики, зоны доступности и дополнительные города.
     </div>
 
-    <div class="base-box">
-      <h2>Что входит в Base</h2>
-      <div class="base-grid">
-        <div class="base-card">
-          <h3>Состав тарифа</h3>
-          <ul>
-            <li>1 город</li>
-            <li>Период: 14 или 30 дней</li>
-            <li>До 10 рубрик 3-го уровня из любой категории 2-го уровня</li>
-            <li>2 сценария аналитики</li>
-            <li>Конкуренты и спрос — по умолчанию</li>
-            <li>Ещё 1 сценарий на выбор</li>
-          </ul>
+    <div class="summary-box">
+      <h2>Summary</h2>
+      <div class="summary-grid">
+        <div class="summary-card">
+          <div class="summary-label">Тир основного города</div>
+          <div class="summary-value" id="summaryTier">—</div>
         </div>
-        <div class="base-card">
-          <h3>Функционал</h3>
-          <ul>
-            <li>AI-агент — 50 запросов в сутки</li>
-            <li>Экспорт в PDF</li>
-            <li>Построение зон доступности: 10 × количество дней тарифа</li>
-            <li>Создание дашбордов и виджетов</li>
-            <li>Агрегация по полигонам</li>
-            <li>Ежедневная загрузка данных</li>
-            <li>До 20 МБ</li>
-          </ul>
+        <div class="summary-card">
+          <div class="summary-label">Срок</div>
+          <div class="summary-value" id="summaryPeriod">—</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-label">Сценарии / рубрики</div>
+          <div class="summary-value" id="summaryParams">—</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-label">Зоны / доп. города</div>
+          <div class="summary-value" id="summaryCities">—</div>
+        </div>
+        <div class="summary-card summary-total" style="grid-column: 1 / -1;">
+          <div class="summary-label">Итого</div>
+          <div class="summary-value" id="summaryTotal">—</div>
         </div>
       </div>
     </div>
@@ -425,32 +417,6 @@
     <div class="result">
       <h2>Итог расчёта</h2>
 
-      <div class="summary-box">
-        <h2>Summary</h2>
-        <div class="summary-grid">
-          <div class="summary-card">
-            <div class="summary-label">Тир основного города</div>
-            <div class="summary-value" id="summaryTier">—</div>
-          </div>
-          <div class="summary-card">
-            <div class="summary-label">Срок</div>
-            <div class="summary-value" id="summaryPeriod">—</div>
-          </div>
-          <div class="summary-card">
-            <div class="summary-label">Сценарии / рубрики</div>
-            <div class="summary-value" id="summaryParams">—</div>
-          </div>
-          <div class="summary-card">
-            <div class="summary-label">Зоны / доп. города</div>
-            <div class="summary-value" id="summaryCities">—</div>
-          </div>
-          <div class="summary-card summary-total" style="grid-column: 1 / -1;">
-            <div class="summary-label">Итого</div>
-            <div class="summary-value" id="summaryTotal">—</div>
-          </div>
-        </div>
-      </div>
-
       <div class="row">
         <span>Базовая стоимость</span>
         <span id="basePrice">0 ₽</span>
@@ -487,6 +453,20 @@
         <button class="copy-btn" id="copyBtn">Скопировать расчёт</button>
         <div class="copy-status" id="copyStatus"></div>
       </div>
+    </div>
+
+    <div class="base-box">
+      <h2>Состав тарифа</h2>
+      <ul>
+        <li>1 город</li>
+        <li>Период: 14 или 30 дней</li>
+        <li>До 10 рубрик</li>
+        <li>2 сценария аналитики (Конкуренты и спрос — по умолчанию + 1 сценарий на выбор)</li>
+        <li>AI-агент — 50 запросов в сутки</li>
+        <li>Построение зон доступности: 10 × количество дней тарифа</li>
+        <li>Создание дашбордов и виджетов</li>
+        <li>Ежедневная загрузка данных До 20 МБ</li>
+      </ul>
     </div>
   </div>
 
@@ -648,9 +628,6 @@
         extraCitiesB: safeExtraCitiesB,
         extraCitiesC: safeExtraCitiesC,
         totalExtraCities,
-        scenarioCoefficient,
-        citiesDiscount,
-        rawCitiesBaseSum,
         citiesPrice,
         warningMessage,
         total
