@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Подбор рубрик</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      color: #222;
+    }
+
+    .page {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+
+    h1 {
+      margin: 0 0 20px;
+      font-size: 32px;
+    }
+
+    .top-panel {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .file-info {
+      padding: 10px 14px;
+      background: #fff;
+      border-radius: 10px;
+      border: 1px solid #d9e0ea;
+      color: #444;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .left-panel,
+    .right-panel {
+      background: #fff;
+      border: 1px solid #d9e0ea;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.04);
+    }
+
+    .panel-title {
+      font-size: 20px;
+      margin: 0 0 15px;
+    }
+
+    .category-block {
+      border: 1px solid #e3e8ef;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      overflow: hidden;
+      background: #fcfdff;
+    }
+
+    .category-header {
+      width: 100%;
+      border: none;
+      background: #eef4ff;
+      padding: 14px 16px;
+      text-align: left;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 600;
+    }
+
+    .category-header:hover {
+      background: #e4eeff;
+    }
+
+    .arrow {
+      font-size: 14px;
+      transition: transform 0.2s ease;
+    }
+
+    .category-block.open .arrow {
+      transform: rotate(180deg);
+    }
+
+    .subcategory-list {
+      display: none;
+      padding: 12px 16px 16px;
+      background: #fff;
+    }
+
+    .category-block.open .subcategory-list {
+      display: block;
+    }
+
+    .subcategory-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f2f5;
+    }
+
+    .subcategory-item:last-child {
+      border-bottom: none;
+    }
+
+    .subcategory-item label {
+      cursor: pointer;
+      line-height: 1.4;
+    }
+
+    .selected-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .selected-item {
+      background: #f4f8ff;
+      border: 1px solid #d8e6ff;
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .selected-text {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .remove-btn {
+      border: none;
+      background: #d9534f;
+      color: #fff;
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .remove-btn:hover {
+      background: #c73f3a;
+    }
+
+    .empty {
+      color: #777;
+      font-size: 14px;
+      padding: 10px 0;
+    }
+
+    .search-box {
+      width: 100%;
+      margin-bottom: 16px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #d9e0ea;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+
+    .actions {
+      margin-top: 16px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      border: none;
+      background: #2f6fed;
+      color: white;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .action-btn.secondary {
+      background: #6c757d;
+    }
+
+    .action-btn:hover {
+      opacity: 0.92;
+    }
+
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .right-panel {
+        order: -1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>Подбор рубрик</h1>
+
+    <div class="top-panel">
+      <div class="file-info">
+        Источник данных: <strong>rubrics.xlsx</strong>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div class="left-panel">
+        <h2 class="panel-title">Рубрики 2-го уровня</h2>
+
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="Поиск по рубрикам..." />
+        </div>
+
+        <div id="categoriesContainer"></div>
+      </div>
+
+      <div class="right-panel">
+        <h2 class="panel-title">Выбранные рубрики</h2>
+        <div id="selectedList" class="selected-list"></div>
+
+        <div class="actions">
+          <button class="action-btn" id="copyBtn">Скопировать список</button>
+          <button class="action-btn secondary" id="clearBtn">Очистить всё</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const EXCEL_FILE = 'rubrics.xlsx';
+
+    let groupedData = {};
+    let selectedItems = new Map();
+
+    async function loadExcel() {
+      try {
+        const response = await fetch(EXCEL_FILE);
+        const arrayBuffer = await response.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+
+        const rows = XLSX.utils.sheet_to_json(worksheet, {
+          header: 1,
+          defval: ''
+        });
+
+        parseRows(rows);
+        renderCategories(groupedData);
+        renderSelected();
+      } catch (error) {
+        console.error('Ошибка загрузки Excel:', error);
+        document.getElementById('categoriesContainer').innerHTML =
+          '<div class="empty">Не удалось загрузить файл Excel. Проверь имя файла и путь.</div>';
+      }
+    }
+
+    function parseRows(rows) {
+      groupedData = {};
+
+      rows.forEach((row, index) => {
+        const level2 = (row[1] || '').toString().trim(); // колонка B
+        const rubric = (row[2] || '').toString().trim(); // колонка C
+
+        // пропускаем пустые строки
+        if (!level2 || !rubric) return;
+
+        // если первая строка похожа на заголовки — тоже пропустим
+        if (
+          index === 0 &&
+          (
+            level2.toLowerCase().includes('рубр') ||
+            rubric.toLowerCase().includes('рубр')
+          )
+        ) {
+          return;
+        }
+
+        if (!groupedData[level2]) {
+          groupedData[level2] = [];
+        }
+
+        // защита от дублей
+        if (!groupedData[level2].includes(rubric)) {
+          groupedData[level2].push(rubric);
+        }
+      });
+    }
+
+    function renderCategories(data) {
+      const container = document.getElementById('categoriesContainer');
+      container.innerHTML = '';
+
+      const entries = Object.entries(data);
+
+      if (!entries.length) {
+        container.innerHTML = '<div class="empty">Нет данных для отображения.</div>';
+        return;
+      }
+
+      entries.forEach(([category, subcategories], categoryIndex) => {
+        const block = document.createElement('div');
+        block.className = 'category-block';
+
+        const header = document.createElement('button');
+        header.className = 'category-header';
+        header.type = 'button';
+        header.innerHTML = `
+          <span>${escapeHtml(category)}</span>
+          <span class="arrow">▼</span>
+        `;
+
+        header.addEventListener('click', () => {
+          block.classList.toggle('open');
+        });
+
+        const list = document.createElement('div');
+        list.className = 'subcategory-list';
+
+        subcategories.forEach((sub, subIndex) => {
+          const item = document.createElement('div');
+          item.className = 'subcategory-item';
+
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.id = `cb_${categoryIndex}_${subIndex}`;
+          checkbox.checked = selectedItems.has(makeKey(category, sub));
+
+          checkbox.addEventListener('change', (e) => {
+            const key = makeKey(category, sub);
+
+            if (e.target.checked) {
+              selectedItems.set(key, { category, sub });
+            } else {
+              selectedItems.delete(key);
+            }
+
+            renderSelected();
+          });
+
+          const label = document.createElement('label');
+          label.htmlFor = checkbox.id;
+          label.textContent = sub;
+
+          item.appendChild(checkbox);
+          item.appendChild(label);
+          list.appendChild(item);
+        });
+
+        block.appendChild(header);
+        block.appendChild(list);
+        container.appendChild(block);
+      });
+    }
+
+    function renderSelected() {
+      const selectedList = document.getElementById('selectedList');
+      selectedList.innerHTML = '';
+
+      if (selectedItems.size === 0) {
+        selectedList.innerHTML = '<div class="empty">Пока ничего не выбрано.</div>';
+        return;
+      }
+
+      Array.from(selectedItems.values()).forEach(({ category, sub }) => {
+        const item = document.createElement('div');
+        item.className = 'selected-item';
+
+        const text = document.createElement('div');
+        text.className = 'selected-text';
+        text.innerHTML = `<strong>${escapeHtml(category)}</strong><br>${escapeHtml(sub)}`;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-btn';
+        removeBtn.textContent = 'Удалить';
+
+        removeBtn.addEventListener('click', () => {
+          selectedItems.delete(makeKey(category, sub));
+          syncCheckbox(category, sub, false);
+          renderSelected();
+        });
+
+        item.appendChild(text);
+        item.appendChild(removeBtn);
+        selectedList.appendChild(item);
+      });
+    }
+
+    function syncCheckbox(category, sub, checked) {
+      const container = document.getElementById('categoriesContainer');
+      const labels = container.querySelectorAll('.subcategory-item');
+
+      labels.forEach(item => {
+        const checkbox = item.querySelector('input[type="checkbox"]');
+        const label = item.querySelector('label');
+
+        if (label && label.textContent === sub && checkbox) {
+          checkbox.checked = checked;
+        }
+      });
+    }
+
+    function makeKey(category, sub) {
+      return `${category}|||${sub}`;
+    }
+
+    function escapeHtml(text) {
+      return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    document.getElementById('searchInput').addEventListener('input', function () {
+      const query = this.value.trim().toLowerCase();
+
+      if (!query) {
+        renderCategories(groupedData);
+        return;
+      }
+
+      const filtered = {};
+
+      Object.entries(groupedData).forEach(([category, subs]) => {
+        const categoryMatch = category.toLowerCase().includes(query);
+        const subMatches = subs.filter(sub => sub.toLowerCase().includes(query));
+
+        if (categoryMatch) {
+          filtered[category] = subs;
+        } else if (subMatches.length) {
+          filtered[category] = subMatches;
+        }
+      });
+
+      renderCategories(filtered);
+
+      // автоматически раскрываем отфильтрованные блоки
+      document.querySelectorAll('.category-block').forEach(block => {
+        block.classList.add('open');
+      });
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      selectedItems.clear();
+      document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+      });
+      renderSelected();
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', async () => {
+      if (selectedItems.size === 0) {
+        alert('Нет выбранных рубрик для копирования.');
+        return;
+      }
+
+      const text = Array.from(selectedItems.values())
+        .map(item => `${item.category} — ${item.sub}`)
+        .join('\n');
+
+      try {
+        await navigator.clipboard.writeText(text);
+        alert('Список скопирован.');
+      } catch (e) {
+        alert('Не удалось скопировать список.');
+      }
+    });
+
+    loadExcel();
+  </script>
+</body>
+</html>
