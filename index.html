@@ -92,7 +92,9 @@
     }
 
     .tiers-box,
-    .warning-box {
+    .warning-box,
+    .base-box,
+    .summary-box {
       margin-top: 28px;
       background: #f9fafb;
       border: 1px solid #e5e7eb;
@@ -106,36 +108,83 @@
       color: #9a3412;
     }
 
-    .tiers-box h2 {
+    .tiers-box h2,
+    .base-box h2,
+    .summary-box h2 {
       margin-top: 0;
       margin-bottom: 15px;
       font-size: 20px;
     }
 
-    .tiers-grid {
+    .tiers-grid,
+    .summary-grid,
+    .base-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
       gap: 16px;
     }
 
-    .tier-card {
+    .tiers-grid {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    .summary-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .base-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .tier-card,
+    .summary-card,
+    .base-card {
       background: #fff;
       border: 1px solid #e5e7eb;
       border-radius: 12px;
       padding: 16px;
     }
 
-    .tier-card h3 {
+    .tier-card h3,
+    .summary-card h3,
+    .base-card h3 {
       margin-top: 0;
       margin-bottom: 10px;
       font-size: 17px;
     }
 
-    .tier-card p {
+    .tier-card p,
+    .base-card ul,
+    .summary-card p {
       margin: 0;
       font-size: 14px;
       line-height: 1.5;
       color: #374151;
+    }
+
+    .base-card ul {
+      padding-left: 18px;
+    }
+
+    .base-card li {
+      margin-bottom: 8px;
+    }
+
+    .summary-label {
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 6px;
+    }
+
+    .summary-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: #111827;
+      line-height: 1.4;
+    }
+
+    .summary-total .summary-value {
+      color: #0f766e;
+      font-size: 22px;
     }
 
     .result {
@@ -216,10 +265,17 @@
       min-height: 20px;
     }
 
+    @media (max-width: 1000px) {
+      .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
     @media (max-width: 900px) {
       .grid,
       .grid-3,
-      .tiers-grid {
+      .tiers-grid,
+      .base-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -238,6 +294,10 @@
       .row span:last-child {
         white-space: normal;
       }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -247,6 +307,35 @@
     <div class="subtitle">
       Расчёт стоимости по тарифу Base: базовый тариф, дополнительные сценарии,
       рубрики, зоны доступности и дополнительные города.
+    </div>
+
+    <div class="base-box">
+      <h2>Что входит в Base</h2>
+      <div class="base-grid">
+        <div class="base-card">
+          <h3>Состав тарифа</h3>
+          <ul>
+            <li>1 город</li>
+            <li>Период: 14 или 30 дней</li>
+            <li>До 10 рубрик 3-го уровня из любой категории 2-го уровня</li>
+            <li>2 сценария аналитики</li>
+            <li>Конкуренты и спрос — по умолчанию</li>
+            <li>Ещё 1 сценарий на выбор</li>
+          </ul>
+        </div>
+        <div class="base-card">
+          <h3>Функционал</h3>
+          <ul>
+            <li>AI-агент — 50 запросов в сутки</li>
+            <li>Экспорт в PDF</li>
+            <li>Построение зон доступности: 10 × количество дней тарифа</li>
+            <li>Создание дашбордов и виджетов</li>
+            <li>Агрегация по полигонам</li>
+            <li>Ежедневная загрузка данных</li>
+            <li>До 20 МБ</li>
+          </ul>
+        </div>
+      </div>
     </div>
 
     <div class="grid">
@@ -335,6 +424,32 @@
 
     <div class="result">
       <h2>Итог расчёта</h2>
+
+      <div class="summary-box">
+        <h2>Summary</h2>
+        <div class="summary-grid">
+          <div class="summary-card">
+            <div class="summary-label">Тир основного города</div>
+            <div class="summary-value" id="summaryTier">—</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Срок</div>
+            <div class="summary-value" id="summaryPeriod">—</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Сценарии / рубрики</div>
+            <div class="summary-value" id="summaryParams">—</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Зоны / доп. города</div>
+            <div class="summary-value" id="summaryCities">—</div>
+          </div>
+          <div class="summary-card summary-total" style="grid-column: 1 / -1;">
+            <div class="summary-label">Итого</div>
+            <div class="summary-value" id="summaryTotal">—</div>
+          </div>
+        </div>
+      </div>
 
       <div class="row">
         <span>Базовая стоимость</span>
@@ -551,6 +666,12 @@
       document.getElementById('isoPrice').textContent = formatPrice(data.isoPrice);
       document.getElementById('citiesPrice').textContent = formatPrice(data.citiesPrice);
       document.getElementById('totalPrice').textContent = formatPrice(data.total);
+
+      document.getElementById('summaryTier').textContent = getTierLabel(data.cityTier);
+      document.getElementById('summaryPeriod').textContent = `${data.period} дней`;
+      document.getElementById('summaryParams').textContent = `${data.scenarios} сценариев / ${data.rubrics} рубрик`;
+      document.getElementById('summaryCities').textContent = `${data.isochrones} зон / ${data.totalExtraCities} доп. городов`;
+      document.getElementById('summaryTotal').textContent = formatPrice(data.total);
 
       const warningBox = document.getElementById('warningBox');
       if (warningBox) {
