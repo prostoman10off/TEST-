@@ -32,7 +32,7 @@
     }
 
     .container {
-      max-width: 1240px;
+      max-width: 1280px;
       margin: 0 auto;
       padding: 32px 20px 48px;
     }
@@ -71,12 +71,12 @@
       color: var(--dgis-muted);
       font-size: 16px;
       line-height: 1.5;
-      max-width: 880px;
+      max-width: 900px;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: 1.25fr 0.75fr;
+      grid-template-columns: 1.35fr 0.65fr;
       gap: 24px;
       align-items: start;
     }
@@ -211,14 +211,14 @@
 
     .checkbox-list {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: 12px;
     }
 
     .checkbox-item {
       border: 1px solid var(--dgis-border);
-      border-radius: 14px;
-      padding: 12px 14px;
+      border-radius: 16px;
+      padding: 14px;
       background: #fafdfb;
       transition: 0.2s ease;
     }
@@ -228,27 +228,63 @@
       background: var(--dgis-green-soft);
     }
 
-    .checkbox-item label {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      cursor: pointer;
-      font-weight: 600;
-      margin: 0;
+    .extra-top {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: start;
     }
 
-    .checkbox-item input {
+    .extra-check {
       margin-top: 3px;
       transform: scale(1.15);
       accent-color: var(--dgis-green);
     }
 
+    .extra-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 4px;
+    }
+
     .checkbox-meta {
       display: block;
-      margin-top: 4px;
       color: var(--dgis-muted);
       font-size: 13px;
       font-weight: 500;
+      line-height: 1.4;
+    }
+
+    .extra-manual {
+      min-width: 170px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .extra-manual label {
+      font-size: 12px;
+      color: var(--dgis-muted);
+      font-weight: 600;
+    }
+
+    .extra-manual input {
+      padding: 10px 12px;
+      font-size: 14px;
+      border-radius: 10px;
+    }
+
+    .extra-bottom {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed #dbe7e1;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: #4b5563;
     }
 
     .formula-box {
@@ -369,7 +405,7 @@
       line-height: 1.5;
     }
 
-    @media (max-width: 980px) {
+    @media (max-width: 1100px) {
       .grid {
         grid-template-columns: 1fr;
       }
@@ -377,9 +413,14 @@
       .result-card {
         position: static;
       }
+    }
 
-      .checkbox-list,
+    @media (max-width: 720px) {
       .updates-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .extra-top {
         grid-template-columns: 1fr;
       }
 
@@ -456,7 +497,7 @@
             <div class="section-title">4. Формула расчета</div>
             <div class="formula-box">
               <div class="formula-title">Расчет выполняется по формуле</div>
-              <div class="formula-main">(база × строки) + (допы × строки) + обновления</div>
+              <div class="formula-main">(база × строки) + доп. данные + обновления</div>
               <div class="formula-example" id="formulaText">—</div>
             </div>
           </div>
@@ -503,12 +544,7 @@
           </div>
 
           <div class="summary-row">
-            <span>Доп. данные за строку</span>
-            <span id="summaryExtrasRate">—</span>
-          </div>
-
-          <div class="summary-row">
-            <span>Стоимость доп. данных</span>
+            <span>Доп. данные</span>
             <span id="summaryExtrasTotal">—</span>
           </div>
 
@@ -556,7 +592,6 @@
 
     const extras = [
       { id: "inn", name: "ИНН и Юр. лицо", type: "fixed", rate: 4.3 },
-
       { id: "coords", name: "Координаты X;Y", type: "tiered" },
       { id: "fias", name: "ФИАС", type: "fixed", rate: 1.1 },
 
@@ -575,9 +610,9 @@
     ];
 
     function formatCurrency(value) {
-      return new Intl.NumberFormat('ru-RU', {
-        style: 'currency',
-        currency: 'RUB',
+      return new Intl.NumberFormat("ru-RU", {
+        style: "currency",
+        currency: "RUB",
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       }).format(value);
@@ -593,13 +628,13 @@
       return 5000;
     }
 
-    function getExtraRate(extra, rows) {
+    function getExtraRate(extra, count) {
       if (extra.type === "fixed") {
         return extra.rate;
       }
 
       if (extra.id === "coords") {
-        return rows <= 25000 ? 3.3 : 1.1;
+        return count <= 25000 ? 3.3 : 1.1;
       }
 
       return 0;
@@ -607,14 +642,14 @@
 
     function getExtraRateLabel(extra) {
       if (extra.type === "fixed") {
-        return `+ ${formatCurrency(extra.rate)} за строку`;
+        return `Ставка: ${formatCurrency(extra.rate)} за строку`;
       }
 
       if (extra.id === "coords") {
-        return `+ 3,30 ₽ до 25 000 строк · + 1,10 ₽ свыше 25 000`;
+        return `Ставка: 3,30 ₽ до 25 000 строк · 1,10 ₽ свыше 25 000`;
       }
 
-      return `Тариф уточняется`;
+      return "Ставка уточняется";
     }
 
     function renderExtras() {
@@ -625,13 +660,29 @@
         const div = document.createElement("div");
         div.className = "checkbox-item";
         div.innerHTML = `
-          <label>
-            <input type="checkbox" class="extra-checkbox" value="${item.id}">
-            <span>
-              ${item.name}
+          <div class="extra-top">
+            <input type="checkbox" class="extra-check extra-checkbox" id="extra-${item.id}" value="${item.id}">
+            <div>
+              <label for="extra-${item.id}" class="extra-name">${item.name}</label>
               <span class="checkbox-meta">${getExtraRateLabel(item)}</span>
-            </span>
-          </label>
+            </div>
+            <div class="extra-manual">
+              <label for="manual-${item.id}">Ручной ввод количества</label>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                class="extra-manual-input"
+                id="manual-${item.id}"
+                data-extra-id="${item.id}"
+                placeholder="По умолчанию — все строки"
+              />
+            </div>
+          </div>
+          <div class="extra-bottom">
+            <span>Количество для расчета: <strong id="extra-count-${item.id}">—</strong></span>
+            <span>Сумма: <strong id="extra-total-${item.id}">—</strong></span>
+          </div>
         `;
         container.appendChild(div);
       });
@@ -644,13 +695,21 @@
       });
     }
 
+    function resetExtraDetails() {
+      extras.forEach(extra => {
+        const countEl = document.getElementById(`extra-count-${extra.id}`);
+        const totalEl = document.getElementById(`extra-total-${extra.id}`);
+        if (countEl) countEl.textContent = "—";
+        if (totalEl) totalEl.textContent = "—";
+      });
+    }
+
     function resetSummaryForInvalid() {
       document.getElementById("totalPrice").textContent = "—";
       document.getElementById("pricePerRowSummary").textContent = "Не достигнут минимальный порог";
       document.getElementById("summaryRows").textContent = "—";
       document.getElementById("summaryBaseRate").textContent = "—";
       document.getElementById("summaryBaseTotal").textContent = "—";
-      document.getElementById("summaryExtrasRate").textContent = "—";
       document.getElementById("summaryExtrasTotal").textContent = "—";
       document.getElementById("summaryUpdates").textContent = "—";
       document.getElementById("summaryBeforeMin").textContent = "—";
@@ -659,6 +718,7 @@
         "Расчет станет доступен после достижения минимального порога в 597 организаций.";
       document.getElementById("minOrderHint").innerHTML =
         `Минимальный порог расчета: <strong>${MIN_ROWS}</strong> организаций.`;
+      resetExtraDetails();
     }
 
     function calculate() {
@@ -692,17 +752,39 @@
       const baseRate = baseRateObj.rate;
       const baseTotal = rows * baseRate;
 
-      const checkedExtras = Array.from(document.querySelectorAll(".extra-checkbox:checked"));
-      let extrasRate = 0;
       let extrasTotal = 0;
+      const extrasFormulaParts = [];
 
-      checkedExtras.forEach(checkbox => {
-        const extra = extras.find(item => item.id === checkbox.value);
-        if (extra) {
-          const rate = getExtraRate(extra, rows);
-          extrasRate += rate;
-          extrasTotal += rows * rate;
+      extras.forEach(extra => {
+        const checkbox = document.getElementById(`extra-${extra.id}`);
+        const manualInput = document.getElementById(`manual-${extra.id}`);
+        const countEl = document.getElementById(`extra-count-${extra.id}`);
+        const totalEl = document.getElementById(`extra-total-${extra.id}`);
+
+        if (!checkbox || !manualInput) return;
+
+        if (!checkbox.checked) {
+          countEl.textContent = "—";
+          totalEl.textContent = "—";
+          return;
         }
+
+        let manualValue = parseInt(manualInput.value, 10);
+        let countForCalc = rows;
+
+        if (!isNaN(manualValue) && manualValue > 0) {
+          countForCalc = manualValue;
+        }
+
+        const rate = getExtraRate(extra, countForCalc);
+        const total = countForCalc * rate;
+
+        extrasTotal += total;
+
+        countEl.textContent = countForCalc.toLocaleString("ru-RU");
+        totalEl.textContent = formatCurrency(total);
+
+        extrasFormulaParts.push(`${extra.name}: ${formatCurrency(rate)} × ${countForCalc.toLocaleString("ru-RU")}`);
       });
 
       const subtotal = baseTotal + extrasTotal;
@@ -723,17 +805,18 @@
       document.getElementById("summaryRows").textContent = rows.toLocaleString("ru-RU");
       document.getElementById("summaryBaseRate").textContent = formatCurrency(baseRate);
       document.getElementById("summaryBaseTotal").textContent = formatCurrency(baseTotal);
-      document.getElementById("summaryExtrasRate").textContent = formatCurrency(extrasRate);
       document.getElementById("summaryExtrasTotal").textContent = formatCurrency(extrasTotal);
       document.getElementById("summaryUpdates").textContent =
         updatesPercent ? `${updateLabel} · ${formatCurrency(updatesCost)}` : updateLabel;
       document.getElementById("summaryBeforeMin").textContent = formatCurrency(totalBeforeMin);
       document.getElementById("summaryFinal").textContent = formatCurrency(finalTotal);
 
+      const extrasText = extrasFormulaParts.length
+        ? extrasFormulaParts.join(" + ")
+        : "доп. данные не выбраны";
+
       document.getElementById("formulaText").textContent =
-        `(${formatCurrency(baseRate)} × ${rows.toLocaleString("ru-RU")}) + ` +
-        `(${formatCurrency(extrasRate)} × ${rows.toLocaleString("ru-RU")}) + ` +
-        `${formatCurrency(updatesCost)} = ${formatCurrency(finalTotal)}`;
+        `(${formatCurrency(baseRate)} × ${rows.toLocaleString("ru-RU")}) + (${extrasText}) + ${formatCurrency(updatesCost)} = ${formatCurrency(finalTotal)}`;
 
       document.getElementById("minOrderHint").innerHTML =
         `Минимальный заказ для текущего объема: <strong>${formatCurrency(minOrder)}</strong>.`;
@@ -750,7 +833,16 @@
       });
 
       document.getElementById("extrasList").addEventListener("change", function (e) {
-        if (e.target.classList.contains("extra-checkbox")) {
+        if (
+          e.target.classList.contains("extra-checkbox") ||
+          e.target.classList.contains("extra-manual-input")
+        ) {
+          calculate();
+        }
+      });
+
+      document.getElementById("extrasList").addEventListener("input", function (e) {
+        if (e.target.classList.contains("extra-manual-input")) {
           calculate();
         }
       });
